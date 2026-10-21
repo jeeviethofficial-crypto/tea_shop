@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { X, Star, MapPin, Thermometer, Clock, Sparkles, Plus, Check, ShieldCheck } from 'lucide-react';
 
 export default function ProductQuickViewModal({ product, isOpen, onClose, onAddToCart }) {
-  if (!isOpen || !product) return null;
-
-  const [selectedVariantId, setSelectedVariantId] = useState(product.variants[0]?.id);
+  const [selectedVariantId, setSelectedVariantId] = useState(product?.variants?.[0]?.id);
   const [isAdded, setIsAdded] = useState(false);
+
+  if (!isOpen || !product) return null;
 
   const currentVariant = product.variants.find(v => v.id === selectedVariantId) || product.variants[0];
 
