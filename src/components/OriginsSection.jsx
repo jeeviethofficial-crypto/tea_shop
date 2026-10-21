@@ -1,5 +1,5 @@
 import React from 'react';
-import { Leaf, Award, Recycle, ShieldCheck, HeartHandshake, Compass } from 'lucide-react';
+import { Recycle, ShieldCheck, HeartHandshake, Compass } from 'lucide-react';
 
 export default function OriginsSection() {
   const origins = [

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, ShieldCheck, Truck, Sparkles, CreditCard, ArrowLeft } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { X, CheckCircle, ShieldCheck } from 'lucide-react';
 
 export default function CheckoutModal({
   isOpen,
@@ -30,19 +29,25 @@ export default function CheckoutModal({
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const generatedId = `ZL-${Math.floor(100000 + Math.random() * 900000)}`;
       setOrderId(generatedId);
       setIsSubmitting(false);
       setOrderConfirmed(true);
 
-      // Trigger Confetti Celebration
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#3E5F44', '#52796F', '#C5A059', '#F3EFEA']
-      });
+      // Dynamically load Confetti only on actual order completion to reduce unused JS
+      try {
+        const confettiModule = await import('canvas-confetti');
+        const confetti = confettiModule.default;
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#3E5F44', '#52796F', '#C5A059', '#F3EFEA']
+        });
+      } catch {
+        // Fallback gracefully if confetti fails to load
+      }
 
       onOrderSuccess();
     }, 1200);

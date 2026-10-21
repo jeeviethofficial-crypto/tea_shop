@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Check, ArrowRight, RotateCcw, Heart, Star } from 'lucide-react';
+import { X, Sparkles, Check, ArrowRight, RotateCcw, Star } from 'lucide-react';
 import { QUIZ_QUESTIONS, PRODUCTS } from '../data/products';
 
 export default function TeaQuizModal({ isOpen, onClose, onAddToCart, onQuickView }) {

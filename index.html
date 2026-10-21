@@ -7,10 +7,19 @@
     <title>ZenLeaf Tea — Artisan Single-Origin Loose Leaf & Ceremonial Matcha</title>
     <meta name="description" content="ZenLeaf Tea offers single-origin, hand-harvested artisan loose leaf teas, ceremonial grade matcha from Kyoto, and handcrafted teaware steeped in mindful tranquility." />
     
-    <!-- Google Fonts -->
+    <!-- Google Fonts Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload Critical LCP Hero Image -->
+    <link rel="preload" as="image" href="/images/hero_matcha.webp" type="image/webp" fetchpriority="high">
+
+    <!-- Asynchronous Non-blocking Google Fonts with display=swap -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap">
+    </noscript>
   </head>
   <body class="bg-[#F9F8F6] text-[#1F2937] antialiased selection:bg-[#3E5F44]/20 selection:text-[#1b2e21]">
     <div id="root"></div>

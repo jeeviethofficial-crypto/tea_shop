@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Star, MapPin, Thermometer, Clock, Sparkles, Plus, Check, ShieldCheck } from 'lucide-react';
+import { X, Star, MapPin, Sparkles, Plus, Check } from 'lucide-react';
 
 export default function ProductQuickViewModal({ product, isOpen, onClose, onAddToCart }) {
   const [selectedVariantId, setSelectedVariantId] = useState(product?.variants?.[0]?.id);
@@ -43,6 +43,10 @@ export default function ProductQuickViewModal({ product, isOpen, onClose, onAddT
               <img
                 src={product.image}
                 alt={product.name}
+                width="600"
+                height="600"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-4 left-4 right-4 bg-[#1F2937]/80 backdrop-blur-md rounded-2xl p-3 text-white text-xs border border-white/20">

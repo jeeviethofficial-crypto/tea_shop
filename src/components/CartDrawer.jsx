@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Sparkles, Tag, Check, Gift } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Sparkles, Tag, Gift } from 'lucide-react';
 
 const FREE_SHIPPING_THRESHOLD = 60;
 const FREE_GIFT_THRESHOLD = 75;
@@ -166,6 +166,10 @@ export default function CartDrawer({
                       <img
                         src={item.product.image}
                         alt={item.product.name}
+                        width="72"
+                        height="72"
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                       />
                     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SlidersHorizontal, X, Sparkles } from 'lucide-react';
+import { SlidersHorizontal, X } from 'lucide-react';
 import { CATEGORIES } from '../data/products';
 
 export default function CategoryFilter({

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowDown, Sparkles, Star, Check, Plus, ShieldCheck, Wind } from 'lucide-react';
+import { ArrowDown, Sparkles, Star, Check, Plus, ShieldCheck } from 'lucide-react';
 
 export default function Hero({ onShopClick, onQuizClick, onAddToCart }) {
   const [selectedVariant, setSelectedVariant] = useState('50g');
@@ -11,7 +11,7 @@ export default function Hero({ onShopClick, onQuizClick, onAddToCart }) {
     name: "Ceremonial Grade Uji Matcha",
     origin: "Kyoto, Japan",
     subregion: "Uji Single Estate",
-    image: "/images/hero_matcha.jpg",
+    image: "/images/hero_matcha.webp",
     variants: [
       { id: "50g", label: "50g Tin", price: 34, weight: "50g" },
       { id: "100g", label: "100g Pouch", price: 58, weight: "100g" }
@@ -137,8 +137,12 @@ export default function Hero({ onShopClick, onQuizClick, onAddToCart }) {
                 <img
                   src={spotlightProduct.image}
                   alt={spotlightProduct.name}
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                  width="1200"
+                  height="896"
+                  fetchPriority="high"
                   loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
                 
                 {/* Subtle Floating Region Tag on image */}

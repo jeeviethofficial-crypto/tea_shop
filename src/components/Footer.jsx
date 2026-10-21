@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Check, Leaf, Sparkles, ArrowRight, ShieldCheck, Heart } from 'lucide-react';
+import { Mail, Check, Leaf, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function Footer({ onOpenQuiz }) {
   const [email, setEmail] = useState('');

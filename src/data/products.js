@@ -12,7 +12,7 @@ export const PRODUCTS = [
     rating: 4.95,
     reviewsCount: 312,
     badge: "Master's Choice",
-    image: "/images/hero_matcha.jpg",
+    image: "/images/hero_matcha.webp",
     description: "Stone-ground for over 3 hours per tin from shaded tencha leaves. Vibrant jade green liquor boasting profound umami, delicate natural sweetness, and a creamy froth without bitterness.",
     flavorNotes: ["Rich Umami", "Creamy Foam", "Sweet Grass", "Subtle Nori"],
     brewGuide: {
@@ -39,7 +39,7 @@ export const PRODUCTS = [
     rating: 4.92,
     reviewsCount: 184,
     badge: "Rare Harvest",
-    image: "/images/gyokuro.jpg",
+    image: "/images/gyokuro.webp",
     description: "Shaded under rice straw mats for 21 days before hand-harvesting. Produces an emerald dew liquor with extraordinary L-theanine concentration and deep oceanic sweetness.",
     flavorNotes: ["Marine Sweetness", "Toasted Pine", "Melon Dew", "Deep Umami"],
     brewGuide: {
@@ -66,7 +66,7 @@ export const PRODUCTS = [
     rating: 4.89,
     reviewsCount: 156,
     badge: "Heritage Roast",
-    image: "/images/wuyi_oolong.jpg",
+    image: "/images/wuyi_oolong.webp",
     description: "Grown in the mineral-rich volcanic cliffs of Mount Wuyi. Charcoal-baked over slow longan wood embers to unlock an intoxicating aroma of roasted orchid and stone fruit.",
     flavorNotes: ["Roasted Orchid", "Mineral Rock", "Stone Fruit", "Honey Wood"],
     brewGuide: {
@@ -93,7 +93,7 @@ export const PRODUCTS = [
     rating: 4.88,
     reviewsCount: 119,
     badge: "Single Estate",
-    image: "/images/nuwara_eliya.jpg",
+    image: "/images/nuwara_eliya.webp",
     description: "The 'Champagne of Ceylon Teas'. Harvested in crisp mountain mists above 6,000 feet. Crystal golden-amber infusion with fragrant notes of eucalyptus, wild citrus, and wildflower honey.",
     flavorNotes: ["Wildflower Honey", "Bright Citrus", "Eucalyptus", "Muscatel"],
     brewGuide: {
@@ -120,7 +120,7 @@ export const PRODUCTS = [
     rating: 4.96,
     reviewsCount: 203,
     badge: "Evening Ritual",
-    image: "/images/botanical_herbal.jpg",
+    image: "/images/botanical_herbal.webp",
     description: "Whole golden German chamomile heads paired with sweet French lavender, lemongrass, and lemon balm. Hand-blended for tranquil nervous system soothing and restorative sleep.",
     flavorNotes: ["Honeyed Apple", "French Lavender", "Lemongrass", "Vanilla Bean"],
     brewGuide: {
@@ -147,7 +147,7 @@ export const PRODUCTS = [
     rating: 4.99,
     reviewsCount: 88,
     badge: "Artisan Crafted",
-    image: "/images/ceramic_kyusu.jpg",
+    image: "/images/ceramic_kyusu.webp",
     description: "Sculpted from iron-rich mineral clay that naturally softens tea astringency. Features a handcrafted ceramic mesh filter and ergonomic side handle for mindful one-handed pouring.",
     flavorNotes: ["Enhances Umami", "Clay Patina", "Zero Plastic", "Heirloom Quality"],
     brewGuide: {
@@ -173,7 +173,7 @@ export const PRODUCTS = [
     rating: 4.97,
     reviewsCount: 142,
     badge: "Complete Ritual",
-    image: "/images/matcha_gift_set.jpg",
+    image: "/images/matcha_gift_set.webp",
     description: "The complete Japanese tea ceremony starter set: includes a hand-carved 100-prong bamboo chasen whisk, carved chashaku spoon, black glazed tenmoku chawan, and 30g fresh ceremonial matcha.",
     flavorNotes: ["Authentic Chasen", "Tenmoku Glaze", "Hand Carved Bamboo", "Gift Boxed"],
     brewGuide: {

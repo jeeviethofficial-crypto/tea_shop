@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Award, Sparkles, BookOpen, Clock, Heart, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 
 export default function ProfileModal({ isOpen, onClose }) {
   if (!isOpen) return null;

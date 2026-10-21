@@ -1,17 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
-import CartDrawer from './components/CartDrawer';
-import TeaQuizModal from './components/TeaQuizModal';
-import ProductQuickViewModal from './components/ProductQuickViewModal';
-import CheckoutModal from './components/CheckoutModal';
-import ProfileModal from './components/ProfileModal';
 import OriginsSection from './components/OriginsSection';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 import { PRODUCTS, CATEGORIES } from './data/products';
+
+// Code-split interactive modals and drawers so unused JavaScript is not loaded on initial page render
+const CartDrawer = lazy(() => import('./components/CartDrawer'));
+const TeaQuizModal = lazy(() => import('./components/TeaQuizModal'));
+const ProductQuickViewModal = lazy(() => import('./components/ProductQuickViewModal'));
+const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
+const ProfileModal = lazy(() => import('./components/ProfileModal'));
 
 export default function App() {
   // Navigation & Category States
@@ -250,55 +252,75 @@ export default function App() {
       <Footer onOpenQuiz={() => setIsQuizOpen(true)} />
 
       {/* Slide-over Shopping Cart Drawer */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onCheckout={() => {
-          setIsCartOpen(false);
-          setIsCheckoutOpen(true);
-        }}
-        discountCode={discountCode}
-        setDiscountCode={setDiscountCode}
-        discountPercent={discountPercent}
-        setDiscountPercent={setDiscountPercent}
-      />
+      {isCartOpen && (
+        <Suspense fallback={null}>
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            cartItems={cartItems}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveItem}
+            onCheckout={() => {
+              setIsCartOpen(false);
+              setIsCheckoutOpen(true);
+            }}
+            discountCode={discountCode}
+            setDiscountCode={setDiscountCode}
+            discountPercent={discountPercent}
+            setDiscountPercent={setDiscountPercent}
+          />
+        </Suspense>
+      )}
 
       {/* Interactive Tea Quiz Modal */}
-      <TeaQuizModal
-        isOpen={isQuizOpen}
-        onClose={() => setIsQuizOpen(false)}
-        onAddToCart={handleAddToCart}
-        onQuickView={(p) => setQuickViewProduct(p)}
-      />
+      {isQuizOpen && (
+        <Suspense fallback={null}>
+          <TeaQuizModal
+            isOpen={isQuizOpen}
+            onClose={() => setIsQuizOpen(false)}
+            onAddToCart={handleAddToCart}
+            onQuickView={(p) => setQuickViewProduct(p)}
+          />
+        </Suspense>
+      )}
 
       {/* Product Quick View Modal */}
-      <ProductQuickViewModal
-        product={quickViewProduct}
-        isOpen={!!quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
-        onAddToCart={handleAddToCart}
-      />
+      {quickViewProduct && (
+        <Suspense fallback={null}>
+          <ProductQuickViewModal
+            product={quickViewProduct}
+            isOpen={!!quickViewProduct}
+            onClose={() => setQuickViewProduct(null)}
+            onAddToCart={handleAddToCart}
+          />
+        </Suspense>
+      )}
 
       {/* Checkout Simulator Modal */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        cartItems={cartItems}
-        subtotal={subtotal}
-        discountAmount={discountAmount}
-        shippingAmount={shippingAmount}
-        grandTotal={grandTotal}
-        onOrderSuccess={handleOrderSuccess}
-      />
+      {isCheckoutOpen && (
+        <Suspense fallback={null}>
+          <CheckoutModal
+            isOpen={isCheckoutOpen}
+            onClose={() => setIsCheckoutOpen(false)}
+            cartItems={cartItems}
+            subtotal={subtotal}
+            discountAmount={discountAmount}
+            shippingAmount={shippingAmount}
+            grandTotal={grandTotal}
+            onOrderSuccess={handleOrderSuccess}
+          />
+        </Suspense>
+      )}
 
       {/* Member Profile Modal */}
-      <ProfileModal
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-      />
+      {isProfileOpen && (
+        <Suspense fallback={null}>
+          <ProfileModal
+            isOpen={isProfileOpen}
+            onClose={() => setIsProfileOpen(false)}
+          />
+        </Suspense>
+      )}
 
       {/* Toast Notification */}
       <Toast

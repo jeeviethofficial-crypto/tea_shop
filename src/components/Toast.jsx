@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, ShoppingBag, X } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
 
 export default function Toast({ toast, onClose, onOpenCart }) {
   if (!toast) return null;
