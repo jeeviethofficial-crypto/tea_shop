@@ -1,6 +1,34 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+const tastingNoteSchema = new mongoose.Schema(
+  {
+    productName: {
+      type: String,
+      required: true
+    },
+    steepGuide: {
+      type: String,
+      default: ''
+    },
+    rating: {
+      type: Number,
+      default: 5.0,
+      min: 1,
+      max: 5
+    },
+    notes: {
+      type: String,
+      default: ''
+    },
+    steepedAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -33,6 +61,34 @@ const userSchema = new mongoose.Schema(
         message: '{VALUE} is not a valid role'
       },
       default: 'customer'
+    },
+    tier: {
+      type: String,
+      default: 'Tier II (Kyoto Apprentice)'
+    },
+    leavesPoints: {
+      type: Number,
+      default: 150,
+      min: 0
+    },
+    tastingJournal: {
+      type: [tastingNoteSchema],
+      default: () => [
+        {
+          productName: 'Uji Ceremonial Matcha',
+          steepGuide: 'Steeped: 80°C, 20s whisk',
+          rating: 5.0,
+          notes: 'Vibrant emerald foam with rich sweet umami finish.',
+          steepedAt: new Date()
+        },
+        {
+          productName: 'Wuyi Da Hong Pao',
+          steepGuide: 'Steeped: 95°C, 30s flash',
+          rating: 4.9,
+          notes: 'Intoxicating roasted orchid, mineral rock, and honey wood notes.',
+          steepedAt: new Date(Date.now() - 86400000 * 2)
+        }
+      ]
     }
   },
   {

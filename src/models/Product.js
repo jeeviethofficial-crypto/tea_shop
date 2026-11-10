@@ -2,9 +2,14 @@ import mongoose from 'mongoose';
 
 const variantSchema = new mongoose.Schema(
   {
-    size: {
+    id: {
       type: String,
-      required: [true, 'Variant size is required'],
+      required: [true, 'Variant ID is required'],
+      trim: true
+    },
+    label: {
+      type: String,
+      required: [true, 'Variant label is required'],
       trim: true
     },
     price: {
@@ -12,11 +17,40 @@ const variantSchema = new mongoose.Schema(
       required: [true, 'Variant price is required'],
       min: [0, 'Price must be non-negative']
     },
+    weight: {
+      type: String,
+      default: ''
+    },
+    inStock: {
+      type: Boolean,
+      default: true
+    },
     stock: {
       type: Number,
-      required: [true, 'Variant stock is required'],
-      default: 0,
+      default: 50,
       min: [0, 'Stock cannot be negative']
+    }
+  },
+  { _id: false }
+);
+
+const brewGuideSchema = new mongoose.Schema(
+  {
+    temp: {
+      type: String,
+      default: '80°C / 175°F'
+    },
+    amount: {
+      type: String,
+      default: '2g - 3g leaves'
+    },
+    water: {
+      type: String,
+      default: '100ml - 150ml water'
+    },
+    style: {
+      type: String,
+      default: 'Steep for 2 minutes'
     }
   },
   { _id: false }
@@ -24,11 +58,22 @@ const variantSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
-    title: {
+    id: {
       type: String,
-      required: [true, 'Product title is required'],
+      unique: true,
+      sparse: true,
+      trim: true
+    },
+    name: {
+      type: String,
+      required: [true, 'Product name is required'],
       trim: true,
-      maxlength: [200, 'Title cannot exceed 200 characters']
+      maxlength: [200, 'Name cannot exceed 200 characters']
+    },
+    japaneseName: {
+      type: String,
+      default: '',
+      trim: true
     },
     slug: {
       type: String,
@@ -51,58 +96,98 @@ const productSchema = new mongoose.Schema(
       }
     },
     origin: {
-      country: {
-        type: String,
-        default: 'Unknown'
-      },
-      region: {
-        type: String,
-        default: 'Single Estate'
-      }
+      type: String,
+      default: 'Unknown Origin',
+      trim: true
     },
-    tastingNotes: {
+    subregion: {
+      type: String,
+      default: 'Single Estate',
+      trim: true
+    },
+    elevation: {
+      type: String,
+      default: ''
+    },
+    harvest: {
+      type: String,
+      default: ''
+    },
+    caffeine: {
+      type: String,
+      default: 'Medium'
+    },
+    rating: {
+      type: Number,
+      default: 4.9,
+      min: [1, 'Rating must be at least 1.0'],
+      max: [5, 'Rating cannot exceed 5.0']
+    },
+    reviewsCount: {
+      type: Number,
+      default: 0
+    },
+    badge: {
+      type: String,
+      default: ''
+    },
+    image: {
+      type: String,
+      default: '/images/hero_matcha.webp'
+    },
+    description: {
+      type: String,
+      default: ''
+    },
+    flavorNotes: {
       type: [String],
       default: []
     },
+    brewGuide: {
+      type: brewGuideSchema,
+      default: () => ({})
+    },
     variants: {
       type: [variantSchema],
-      required: [true, 'At least one variant is required'],
+      required: [true, 'At least one variant size with pricing is required'],
       validate: {
         validator: function (v) {
           return Array.isArray(v) && v.length > 0;
         },
-        message: 'Product must have at least one variant size with pricing'
+        message: 'Product must have at least one variant'
       }
-    },
-    imageUrl: {
-      type: String,
-      default: '/images/hero_matcha.jpg'
     },
     isFeatured: {
       type: Boolean,
       default: false
-    },
-    brewingGuide: {
-      temp: {
-        type: String,
-        default: '80°C / 175°F'
-      },
-      steepTime: {
-        type: String,
-        default: '2 - 3 minutes'
-      }
     }
   },
   {
     timestamps: true,
     toJSON: {
+      virtuals: true,
       transform: function (doc, ret) {
+        if (!ret.id && ret._id) {
+          ret.id = ret._id.toString();
+        }
         delete ret.__v;
         return ret;
       }
-    }
+    },
+    toObject: { virtuals: true }
   }
 );
+
+// Backward-compatibility aliases
+productSchema.virtual('title').get(function () {
+  return this.name;
+});
+productSchema.virtual('imageUrl').get(function () {
+  return this.image;
+});
+productSchema.virtual('tastingNotes').get(function () {
+  return this.flavorNotes;
+});
 
 // Slugify helper
 function generateSlug(text) {
@@ -114,32 +199,36 @@ function generateSlug(text) {
     .replace(/^-+|-+$/g, '');
 }
 
-// Auto-populate slug if not provided before validation
+// Auto-generate slug and id if not provided before validation
 productSchema.pre('validate', function () {
-  if (this.title && !this.slug) {
-    this.slug = generateSlug(this.title);
+  if (this.name && !this.slug) {
+    this.slug = generateSlug(this.name);
+  }
+  if (!this.id && this.slug) {
+    this.id = this.slug;
   }
 });
 
-// Indexes for fast searching, filtering, and sorting
+// Indexes for fast querying, filtering, and text search
 productSchema.index({ category: 1 });
 productSchema.index({ isFeatured: 1 });
 productSchema.index({ 'variants.price': 1 });
 productSchema.index(
   {
-    title: 'text',
-    tastingNotes: 'text',
-    'origin.country': 'text',
-    'origin.region': 'text'
+    name: 'text',
+    description: 'text',
+    flavorNotes: 'text',
+    origin: 'text',
+    subregion: 'text'
   },
   {
     weights: {
-      title: 10,
-      tastingNotes: 5,
-      'origin.country': 2,
-      'origin.region': 2
+      name: 10,
+      flavorNotes: 5,
+      origin: 3,
+      description: 1
     },
-    name: 'ProductTextIndex'
+    name: 'ProductTextSearchIndex'
   }
 );
 

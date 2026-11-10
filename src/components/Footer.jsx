@@ -5,14 +5,24 @@ import Leaf from 'lucide-react/dist/esm/icons/leaf';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import { subscribeNewsletter } from '../services/api';
 
 export default function Footer({ onOpenQuiz }) {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [welcomeCode, setWelcomeCode] = useState('ZEN15');
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     if (email.trim()) {
+      try {
+        const res = await subscribeNewsletter(email.trim());
+        if (res?.data?.code) {
+          setWelcomeCode(res.data.code);
+        }
+      } catch {
+        // Fallback gracefully
+      }
       setSubscribed(true);
     }
   };
@@ -76,7 +86,7 @@ export default function Footer({ onOpenQuiz }) {
                     <span>Welcome to the Flight!</span>
                   </div>
                   <p className="text-xs text-[#1F2937]">
-                    Use code <strong className="font-mono bg-white px-2 py-0.5 rounded border border-[#3E5F44]/40 text-[#3E5F44]">ZEN15</strong> at checkout for 15% off your tea order today.
+                    Use code <strong className="font-mono bg-white px-2 py-0.5 rounded border border-[#3E5F44]/40 text-[#3E5F44]">{welcomeCode}</strong> at checkout for 15% off your tea order today.
                   </p>
                 </div>
               )}

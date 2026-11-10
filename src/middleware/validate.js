@@ -40,13 +40,14 @@ export const validateLogin = (req, res, next) => {
 };
 
 /**
- * Validate product creation input
+ * Validate product creation / update input
  */
 export const validateProduct = (req, res, next) => {
-  const { title, category, variants } = req.body;
+  const { name, title, category, variants } = req.body;
+  const productName = name || title;
 
-  if (!title || typeof title !== 'string' || !title.trim()) {
-    return next(createHttpError(400, 'Product title is required'));
+  if (!productName || typeof productName !== 'string' || !productName.trim()) {
+    return next(createHttpError(400, 'Product name is required'));
   }
 
   const validCategories = [
@@ -70,11 +71,12 @@ export const validateProduct = (req, res, next) => {
   }
 
   for (const v of variants) {
-    if (!v.size || typeof v.price !== 'number' || v.price < 0) {
+    const label = v.label || v.size;
+    if (!label || typeof v.price !== 'number' || v.price < 0) {
       return next(
         createHttpError(
           400,
-          'Each variant must specify a size and a non-negative price'
+          'Each variant must specify a label/size and a non-negative price'
         )
       );
     }
@@ -84,7 +86,7 @@ export const validateProduct = (req, res, next) => {
 };
 
 /**
- * Validate order creation input
+ * Validate order placement input
  */
 export const validateOrder = (req, res, next) => {
   const { items } = req.body;
@@ -95,14 +97,33 @@ export const validateOrder = (req, res, next) => {
 
   for (const item of items) {
     if (!item.product) {
-      return next(createHttpError(400, 'Each item must have a valid product ID'));
+      return next(createHttpError(400, 'Each item must have a valid product identifier'));
     }
-    if (!item.variantSize) {
-      return next(createHttpError(400, 'Each item must specify a variantSize'));
+    const variantId = item.variant?.id || item.variantId || item.variantSize;
+    if (!variantId && !item.variant) {
+      return next(createHttpError(400, 'Each item must specify a variant'));
     }
-    if (!item.quantity || typeof item.quantity !== 'number' || item.quantity < 1) {
+    if (item.quantity !== undefined && (typeof item.quantity !== 'number' || item.quantity < 1)) {
       return next(createHttpError(400, 'Item quantity must be a positive integer'));
     }
+  }
+
+  next();
+};
+
+/**
+ * Validate newsletter subscription input
+ */
+export const validateNewsletter = (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email || typeof email !== 'string' || !email.trim()) {
+    return next(createHttpError(400, 'Email address is required'));
+  }
+
+  const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+  if (!emailRegex.test(email)) {
+    return next(createHttpError(400, 'Please provide a valid email format'));
   }
 
   next();
@@ -112,5 +133,6 @@ export default {
   validateRegister,
   validateLogin,
   validateProduct,
-  validateOrder
+  validateOrder,
+  validateNewsletter
 };

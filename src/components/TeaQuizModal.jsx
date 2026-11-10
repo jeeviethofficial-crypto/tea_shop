@@ -6,6 +6,7 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import RotateCcw from 'lucide-react/dist/esm/icons/rotate-ccw';
 import Star from 'lucide-react/dist/esm/icons/star';
 import { QUIZ_QUESTIONS, PRODUCTS } from '../data/products';
+import { getQuizRecommendation } from '../services/api';
 
 export default function TeaQuizModal({ isOpen, onClose, onAddToCart, onQuickView }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -26,8 +27,22 @@ export default function TeaQuizModal({ isOpen, onClose, onAddToCart, onQuickView
     }
   };
 
-  const calculateResult = (finalAnswers) => {
-    // Intelligent heuristic matching
+  const calculateResult = async (finalAnswers) => {
+    try {
+      const res = await getQuizRecommendation({
+        time: finalAnswers.time?.id,
+        taste: finalAnswers.taste?.id,
+        ritual: finalAnswers.ritual?.id
+      });
+      if (res?.data?.recommendedProduct) {
+        setMatchedProduct(res.data.recommendedProduct);
+        return;
+      }
+    } catch {
+      // Fallback gracefully to client heuristic
+    }
+
+    // Intelligent heuristic matching fallback
     const timeChoice = finalAnswers.time?.id;
     const tasteChoice = finalAnswers.taste?.id;
     

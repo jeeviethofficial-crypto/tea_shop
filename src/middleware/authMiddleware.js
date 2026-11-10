@@ -13,24 +13,21 @@ export const generateToken = (userId) => {
 };
 
 /**
- * Middleware to authenticate requests via Bearer token
- * Compatible with both web and React Native/Expo mobile clients
+ * Mandatory Bearer token authentication
  */
 export const protect = async (req, res, next) => {
   try {
     let token = null;
 
-    // Check Authorization header for Bearer token
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.split(' ')[1];
     }
 
     if (!token) {
-      throw createHttpError(401, 'Authentication failed: No Bearer token provided');
+      throw createHttpError(401, 'Authentication required: No Bearer token provided');
     }
 
-    // Verify token
     let decoded;
     try {
       decoded = jwt.verify(token, config.jwtSecret);
@@ -41,13 +38,11 @@ export const protect = async (req, res, next) => {
       throw createHttpError(401, 'Authentication failed: Invalid or malformed token');
     }
 
-    // Lookup user by decoded ID
     const user = await User.findById(decoded.id);
     if (!user) {
-      throw createHttpError(401, 'Authentication failed: User no longer exists');
+      throw createHttpError(401, 'Authentication failed: User account no longer exists');
     }
 
-    // Attach user to request object
     req.user = user;
     next();
   } catch (error) {
@@ -56,19 +51,50 @@ export const protect = async (req, res, next) => {
 };
 
 /**
- * Middleware to restrict route access based on user roles (e.g. 'admin')
+ * Optional authentication: attaches req.user if Bearer token present, but allows guests
+ */
+export const optionalProtect = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      req.user = null;
+      return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    try {
+      const decoded = jwt.verify(token, config.jwtSecret);
+      const user = await User.findById(decoded.id);
+      req.user = user || null;
+    } catch {
+      req.user = null;
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Restrict route access based on user role(s)
  */
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return next(createHttpError(401, 'Not authenticated'));
+      return next(createHttpError(401, 'Authentication required'));
     }
 
     if (!roles.includes(req.user.role)) {
       return next(
         createHttpError(
           403,
-          `Access forbidden: User role '${req.user.role}' is not authorized to access this route`
+          `Access forbidden: Role '${req.user.role}' is not authorized for this resource`
         )
       );
     }
@@ -77,4 +103,4 @@ export const authorize = (...roles) => {
   };
 };
 
-export default { protect, authorize, generateToken };
+export default { protect, optionalProtect, authorize, generateToken };

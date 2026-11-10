@@ -3,141 +3,19 @@ import config from '../config/env.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Order from '../models/Order.js';
-
-const ARTISAN_TEAS = [
-  {
-    title: 'Ceremonial Grade Uji Matcha',
-    slug: 'ceremonial-grade-uji-matcha',
-    category: 'Green & Matcha',
-    origin: {
-      country: 'Japan',
-      region: 'Kyoto (Uji Single Estate)'
-    },
-    tastingNotes: ['Rich Umami', 'Creamy Foam', 'Sweet Grass', 'Subtle Nori'],
-    variants: [
-      { size: '50g Tin', price: 34, stock: 45 },
-      { size: '100g Pouch', price: 58, stock: 30 }
-    ],
-    imageUrl: '/images/hero_matcha.jpg',
-    isFeatured: true,
-    brewingGuide: {
-      temp: '80°C / 175°F',
-      steepTime: 'Whisk 20s briskly in W motion'
-    }
-  },
-  {
-    title: 'Imperial Gyokuro Shade-Grown',
-    slug: 'imperial-gyokuro-shade-grown',
-    category: 'Green & Matcha',
-    origin: {
-      country: 'Japan',
-      region: 'Shizuoka (Mount Fuji Foothills)'
-    },
-    tastingNotes: ['Marine Sweetness', 'Toasted Pine', 'Melon Dew', 'Deep Umami'],
-    variants: [
-      { size: '50g Tin', price: 38, stock: 25 },
-      { size: '100g Pouch', price: 68, stock: 15 }
-    ],
-    imageUrl: '/images/gyokuro.jpg',
-    isFeatured: true,
-    brewingGuide: {
-      temp: '60°C / 140°F',
-      steepTime: 'Steep 90s'
-    }
-  },
-  {
-    title: 'Wuyi Cliff Da Hong Pao Oolong',
-    slug: 'wuyi-cliff-da-hong-pao-oolong',
-    category: 'Black & Oolong',
-    origin: {
-      country: 'China',
-      region: 'Wuyi Mountains (Zhengyan Rock Valley)'
-    },
-    tastingNotes: ['Roasted Orchid', 'Mineral Rock', 'Stone Fruit', 'Honey Wood'],
-    variants: [
-      { size: '50g Tin', price: 29, stock: 50 },
-      { size: '100g Pouch', price: 52, stock: 35 }
-    ],
-    imageUrl: '/images/wuyi_oolong.jpg',
-    isFeatured: true,
-    brewingGuide: {
-      temp: '95°C / 203°F',
-      steepTime: 'Flash brew 25s'
-    }
-  },
-  {
-    title: 'Nuwara Eliya High Grown Ceylon',
-    slug: 'nuwara-eliya-high-grown-ceylon',
-    category: 'Black & Oolong',
-    origin: {
-      country: 'Sri Lanka',
-      region: 'Nuwara Eliya (Lovers Leap Peak)'
-    },
-    tastingNotes: ['Wildflower Honey', 'Bright Citrus', 'Eucalyptus', 'Muscatel'],
-    variants: [
-      { size: '50g Tin', price: 24, stock: 60 },
-      { size: '100g Pouch', price: 42, stock: 40 }
-    ],
-    imageUrl: '/images/nuwara_eliya.jpg',
-    isFeatured: false,
-    brewingGuide: {
-      temp: '92°C / 198°F',
-      steepTime: 'Steep 3 - 4 minutes'
-    }
-  },
-  {
-    title: 'Himalayan Organic Chamomile & Lavender',
-    slug: 'himalayan-organic-chamomile-lavender',
-    category: 'Herbal & Infusions',
-    origin: {
-      country: 'India',
-      region: 'Kumaon Valley (High Himalayas)'
-    },
-    tastingNotes: ['Crisp Apple', 'Velvet Lavender', 'Golden Honey', 'Vanilla Bean'],
-    variants: [
-      { size: '50g Tin', price: 22, stock: 40 },
-      { size: '100g Pouch', price: 38, stock: 25 }
-    ],
-    imageUrl: '/images/chamomile_lavender.jpg',
-    isFeatured: false,
-    brewingGuide: {
-      temp: '100°C / 212°F',
-      steepTime: 'Steep 5 - 7 minutes'
-    }
-  },
-  {
-    title: 'Artisan Tokoname Ceramic Kyusu Teapot',
-    slug: 'artisan-tokoname-ceramic-kyusu-teapot',
-    category: 'Tea Ware & Gifts',
-    origin: {
-      country: 'Japan',
-      region: 'Aichi (Tokoname Kiln)'
-    },
-    tastingNotes: ['Unglazed Red Clay', 'Natural Ion Smoothing', 'Precision Mesh Filter'],
-    variants: [
-      { size: '280ml Kyusu', price: 68, stock: 12 },
-      { size: 'Gift Set with 2 Cups', price: 92, stock: 8 }
-    ],
-    imageUrl: '/images/hero_matcha.jpg',
-    isFeatured: true,
-    brewingGuide: {
-      temp: 'N/A',
-      steepTime: 'Ideal for multi-infusion green & oolong teas'
-    }
-  }
-];
+import { PRODUCTS } from '../data/products.js';
 
 const seedDatabase = async () => {
   try {
     console.log('[Seed] Connecting to MongoDB at', config.mongoUri);
-    await mongoose.connect(config.mongoUri);
+    await mongoose.connect(config.mongoUri, { serverSelectionTimeoutMS: 5000 });
     console.log('[Seed] Connected successfully');
 
     // Clean existing products, orders, and test users
     console.log('[Seed] Clearing existing collections...');
     await Product.deleteMany({});
     await Order.deleteMany({});
-    await User.deleteMany({ email: { $in: ['admin@zenleaftea.com', 'customer@zenleaftea.com'] } });
+    await User.deleteMany({ email: { $in: ['admin@zenleaftea.com', 'customer@zenleaftea.com', 'eleanor.vance@mindfultravel.com'] } });
 
     // Seed Users
     console.log('[Seed] Creating demo users...');
@@ -145,61 +23,94 @@ const seedDatabase = async () => {
       name: 'ZenLeaf Administrator',
       email: 'admin@zenleaftea.com',
       password: 'admin123456',
-      role: 'admin'
+      role: 'admin',
+      tier: 'Master of the Way',
+      leavesPoints: 1200
     });
 
     const customerUser = await User.create({
-      name: 'Evelyn Reed',
-      email: 'customer@zenleaftea.com',
+      name: 'Eleanor Vance',
+      email: 'eleanor.vance@mindfultravel.com',
       password: 'tea123456',
-      role: 'customer'
+      role: 'customer',
+      tier: 'Tier II (Kyoto Apprentice)',
+      leavesPoints: 150
     });
 
     console.log(`[Seed] Created admin: ${adminUser.email}`);
     console.log(`[Seed] Created customer: ${customerUser.email}`);
 
-    // Seed Products
-    console.log('[Seed] Seeding 6 artisan tea products...');
-    const createdProducts = await Product.insertMany(ARTISAN_TEAS);
+    // Seed Products directly from frontend catalog data
+    console.log(`[Seed] Seeding ${PRODUCTS.length} artisan tea products...`);
+    const productsToInsert = PRODUCTS.map((p, idx) => ({
+      ...p,
+      isFeatured: idx < 3,
+      variants: p.variants.map((v) => ({
+        ...v,
+        stock: 50,
+        inStock: true
+      }))
+    }));
+
+    const createdProducts = await Product.insertMany(productsToInsert);
     console.log(`[Seed] Successfully seeded ${createdProducts.length} artisan products:`);
     createdProducts.forEach((p, idx) => {
-      console.log(`   ${idx + 1}. [${p.category}] ${p.title} (${p.variants.length} variants)`);
+      console.log(`   ${idx + 1}. [${p.category}] ${p.name} (${p.variants.length} variants) - rating: ${p.rating}`);
     });
 
-    // Create an initial sample order for the customer
+    // Create an initial sample order for Eleanor Vance
     console.log('[Seed] Creating initial sample order...');
     const sampleProduct = createdProducts[0];
     const sampleVariant = sampleProduct.variants[0];
     await Order.create({
+      orderId: 'ZL-749102',
       user: customerUser._id,
+      customer: {
+        name: customerUser.name,
+        email: customerUser.email,
+        phone: '+1 (503) 555-0194'
+      },
       items: [
         {
-          product: sampleProduct._id,
-          variantSize: sampleVariant.size,
+          product: sampleProduct.id || sampleProduct._id,
+          productName: sampleProduct.name,
+          productImage: sampleProduct.image,
+          variantId: sampleVariant.id,
+          variantLabel: sampleVariant.label,
           price: sampleVariant.price,
-          quantity: 1
+          quantity: 1,
+          subtotal: sampleVariant.price
         }
       ],
-      totalAmount: sampleVariant.price,
+      subtotal: sampleVariant.price,
+      discountCode: 'ZEN15',
+      discountPercent: 15,
+      discountAmount: Math.round(((sampleVariant.price * 15) / 100) * 100) / 100,
+      shippingAmount: 0,
+      grandTotal: Math.round((sampleVariant.price * 0.85) * 100) / 100,
       shippingAddress: {
-        fullName: 'Evelyn Reed',
+        fullName: 'Eleanor Vance',
         street: '452 Serenity Way',
         city: 'Portland',
         state: 'OR',
         postalCode: '97201',
         country: 'USA'
       },
-      status: 'processing',
-      paymentStatus: 'paid'
+      paymentDetails: {
+        method: 'card',
+        last4: '4242',
+        status: 'paid'
+      },
+      status: 'delivered'
     });
-    console.log('[Seed] Initial sample order created successfully');
+    console.log('[Seed] Initial sample order ZL-749102 created successfully');
 
     console.log('\n===========================================');
     console.log('  ZenLeaf Tea Database Seed Completed!');
     console.log('===========================================');
     console.log('Demo Credentials:');
-    console.log('  Admin:    admin@zenleaftea.com    / admin123456');
-    console.log('  Customer: customer@zenleaftea.com / tea123456');
+    console.log('  Admin:    admin@zenleaftea.com            / admin123456');
+    console.log('  Customer: eleanor.vance@mindfultravel.com / tea123456');
     console.log('===========================================\n');
 
     await mongoose.connection.close();
