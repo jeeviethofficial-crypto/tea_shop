@@ -3,13 +3,25 @@ import mongoose from 'mongoose';
 const orderItemSchema = new mongoose.Schema(
   {
     product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
+      type: mongoose.Schema.Types.Mixed, // Can be ObjectId or string ID (e.g. 'zen-01')
       required: [true, 'Product reference is required']
     },
-    variantSize: {
+    productName: {
       type: String,
-      required: [true, 'Variant size is required']
+      required: true,
+      trim: true
+    },
+    productImage: {
+      type: String,
+      default: '/images/hero_matcha.webp'
+    },
+    variantId: {
+      type: String,
+      default: ''
+    },
+    variantLabel: {
+      type: String,
+      required: [true, 'Variant label is required']
     },
     price: {
       type: Number,
@@ -20,6 +32,10 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Item quantity is required'],
       min: [1, 'Quantity must be at least 1']
+    },
+    subtotal: {
+      type: Number,
+      required: true
     }
   },
   { _id: false }
@@ -27,11 +43,23 @@ const orderItemSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    orderId: {
+      type: String,
+      unique: true,
+      required: true,
+      index: true
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User reference is required'],
+      required: false,
+      default: null,
       index: true
+    },
+    customer: {
+      name: { type: String, default: 'Guest Customer' },
+      email: { type: String, default: '' },
+      phone: { type: String, default: '' }
     },
     items: {
       type: [orderItemSchema],
@@ -43,10 +71,31 @@ const orderSchema = new mongoose.Schema(
         message: 'Order items cannot be empty'
       }
     },
-    totalAmount: {
+    subtotal: {
       type: Number,
-      required: [true, 'Total amount is required'],
-      min: [0, 'Total amount cannot be negative']
+      required: [true, 'Subtotal is required'],
+      min: [0, 'Subtotal cannot be negative']
+    },
+    discountCode: {
+      type: String,
+      default: ''
+    },
+    discountPercent: {
+      type: Number,
+      default: 0
+    },
+    discountAmount: {
+      type: Number,
+      default: 0
+    },
+    shippingAmount: {
+      type: Number,
+      default: 0
+    },
+    grandTotal: {
+      type: Number,
+      required: [true, 'Grand total is required'],
+      min: [0, 'Grand total cannot be negative']
     },
     shippingAddress: {
       fullName: { type: String, default: '' },
@@ -56,22 +105,23 @@ const orderSchema = new mongoose.Schema(
       postalCode: { type: String, default: '' },
       country: { type: String, default: 'USA' }
     },
+    paymentDetails: {
+      method: { type: String, default: 'card' },
+      last4: { type: String, default: '4242' },
+      status: {
+        type: String,
+        enum: ['unpaid', 'paid', 'refunded'],
+        default: 'paid'
+      }
+    },
     status: {
       type: String,
       enum: {
         values: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
         message: '{VALUE} is not a valid order status'
       },
-      default: 'pending',
+      default: 'processing',
       index: true
-    },
-    paymentStatus: {
-      type: String,
-      enum: {
-        values: ['unpaid', 'paid'],
-        message: '{VALUE} is not a valid payment status'
-      },
-      default: 'unpaid'
     }
   },
   {

@@ -23,7 +23,25 @@ export const getProducts = async (req, res, next) => {
 };
 
 /**
- * @desc    Get single product by MongoDB ID or slug
+ * @desc    Get categories with live product counts
+ * @route   GET /api/v1/products/categories
+ * @access  Public
+ */
+export const getCategories = async (req, res, next) => {
+  try {
+    const data = await productService.getCategoryCounts();
+
+    res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get single product by MongoDB ID, custom id, or slug
  * @route   GET /api/v1/products/:id
  * @access  Public
  */
@@ -53,33 +71,114 @@ export const getProductById = async (req, res, next) => {
 export const createProduct = async (req, res, next) => {
   try {
     const {
+      id,
+      name,
       title,
+      japaneseName,
       slug,
       category,
       origin,
-      tastingNotes,
-      variants,
+      subregion,
+      elevation,
+      harvest,
+      caffeine,
+      badge,
+      image,
       imageUrl,
-      isFeatured,
-      brewingGuide
+      description,
+      flavorNotes,
+      tastingNotes,
+      brewGuide,
+      variants,
+      isFeatured
     } = req.body;
 
     const product = await Product.create({
-      title,
+      id: id || slug,
+      name: name || title,
+      japaneseName,
       slug,
       category,
       origin,
-      tastingNotes,
+      subregion,
+      elevation,
+      harvest,
+      caffeine,
+      badge,
+      image: image || imageUrl,
+      description,
+      flavorNotes: flavorNotes || tastingNotes || [],
+      brewGuide,
       variants,
-      imageUrl,
-      isFeatured: !!isFeatured,
-      brewingGuide
+      isFeatured: !!isFeatured
     });
 
     res.status(201).json({
       success: true,
-      message: 'Product created successfully',
+      message: 'Artisan product created successfully',
       data: product
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Update an existing product
+ * @route   PUT /api/v1/products/:id
+ * @access  Private / Admin only
+ */
+export const updateProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({
+      $or: [
+        { id },
+        ...(id.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: id }] : []),
+        { slug: id }
+      ]
+    });
+
+    if (!product) {
+      throw createHttpError(404, `Product not found with identifier '${id}'`);
+    }
+
+    Object.assign(product, req.body);
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Product updated successfully',
+      data: product
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Delete a product
+ * @route   DELETE /api/v1/products/:id
+ * @access  Private / Admin only
+ */
+export const deleteProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOneAndDelete({
+      $or: [
+        { id },
+        ...(id.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: id }] : []),
+        { slug: id }
+      ]
+    });
+
+    if (!product) {
+      throw createHttpError(404, `Product not found with identifier '${id}'`);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Product '${product.name}' deleted successfully`
     });
   } catch (error) {
     next(error);
@@ -88,6 +187,9 @@ export const createProduct = async (req, res, next) => {
 
 export default {
   getProducts,
+  getCategories,
   getProductById,
-  createProduct
+  createProduct,
+  updateProduct,
+  deleteProduct
 };

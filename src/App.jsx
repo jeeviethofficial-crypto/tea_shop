@@ -1,9 +1,10 @@
-import React, { useState, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
 import { PRODUCTS, CATEGORIES } from './data/products';
+import { getProducts } from './services/api';
 
 // Code-split below-the-fold components and interactive overlays to prevent blocking initial LCP
 const OriginsSection = lazy(() => import('./components/OriginsSection'));
@@ -16,6 +17,26 @@ const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
 const ProfileModal = lazy(() => import('./components/ProfileModal'));
 
 export default function App() {
+  // Live Product State (Initialized with bundled PRODUCTS for instantaneous LCP rendering)
+  const [productsList, setProductsList] = useState(PRODUCTS);
+
+  // Sync with live REST API backend
+  useEffect(() => {
+    let isMounted = true;
+    getProducts()
+      .then((res) => {
+        if (isMounted && res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          setProductsList(res.data);
+        }
+      })
+      .catch(() => {
+        // Keeps bundled catalog on network disconnect
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Navigation & Category States
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,18 +149,18 @@ export default function App() {
 
   // Category counts
   const productCounts = useMemo(() => {
-    const counts = { All: PRODUCTS.length };
+    const counts = { All: productsList.length };
     CATEGORIES.forEach((cat) => {
       if (cat !== "All") {
-        counts[cat] = PRODUCTS.filter((p) => p.category === cat).length;
+        counts[cat] = productsList.filter((p) => p.category === cat).length;
       }
     });
     return counts;
-  }, []);
+  }, [productsList]);
 
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    return productsList.filter((product) => {
       // Category match
       const matchesCategory =
         activeCategory === "All" || product.category === activeCategory;
@@ -166,7 +187,7 @@ export default function App() {
       }
       return 0; // featured default order
     });
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [productsList, activeCategory, searchQuery, sortBy]);
 
   const scrollToCatalog = () => {
     const el = document.getElementById("catalog-section");

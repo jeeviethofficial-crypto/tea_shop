@@ -8,6 +8,7 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import Gift from 'lucide-react/dist/esm/icons/gift';
+import { validateCoupon } from '../services/api';
 
 const FREE_SHIPPING_THRESHOLD = 60;
 const FREE_GIFT_THRESHOLD = 75;
@@ -41,24 +42,39 @@ export default function CartDrawer({
   const hasFreeGift = taxableSubtotal >= FREE_GIFT_THRESHOLD;
   const grandTotal = taxableSubtotal + shippingAmount;
 
-  const handleApplyPromo = (e) => {
+  const handleApplyPromo = async (e) => {
     e.preventDefault();
     setPromoError('');
     setPromoSuccess('');
     const code = promoInput.trim().toUpperCase();
+    if (!code) return;
 
-    if (code === 'ZEN15' || code === 'FIRSTFLUSH') {
-      setDiscountCode(code);
-      setDiscountPercent(15);
-      setPromoSuccess('15% Artisan Discount Applied!');
-      setPromoInput('');
-    } else if (code === 'MATCHA20') {
-      setDiscountCode(code);
-      setDiscountPercent(20);
-      setPromoSuccess('20% Master Flight Discount Applied!');
-      setPromoInput('');
-    } else {
-      setPromoError('Invalid code. Try "ZEN15" for 15% off.');
+    try {
+      const res = await validateCoupon(code, subtotal);
+      if (res?.data?.valid) {
+        setDiscountCode(res.data.code);
+        setDiscountPercent(res.data.discountPercent);
+        setPromoSuccess(res.data.message || `${res.data.discountPercent}% Discount Applied!`);
+        setPromoInput('');
+        return;
+      } else {
+        setPromoError(res?.data?.message || 'Invalid code');
+        return;
+      }
+    } catch {
+      if (code === 'ZEN15' || code === 'FIRSTFLUSH') {
+        setDiscountCode(code);
+        setDiscountPercent(15);
+        setPromoSuccess('15% Artisan Discount Applied!');
+        setPromoInput('');
+      } else if (code === 'MATCHA20') {
+        setDiscountCode(code);
+        setDiscountPercent(20);
+        setPromoSuccess('20% Master Flight Discount Applied!');
+        setPromoInput('');
+      } else {
+        setPromoError('Invalid code. Try "ZEN15" for 15% off.');
+      }
     }
   };
 

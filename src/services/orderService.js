@@ -1,98 +1,195 @@
 import createHttpError from 'http-errors';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
+import couponService from './couponService.js';
 
 /**
- * Validates cart items, verifies stock availability,
- * calculates authoritative server-side totals, decrements inventory, and saves the order.
+ * Validates cart items, verifies stock, applies discounts,
+ * computes authoritative server-side totals, decrements inventory, and saves the order.
  *
  * @param {Object} params
- * @param {string} params.userId - Authenticated user ID
- * @param {Array} params.items - Array of { product, variantSize, quantity }
+ * @param {string|null} params.userId - Authenticated user ID (optional)
+ * @param {Object} params.customer - Guest or authenticated customer details { name, email, phone }
+ * @param {Array} params.items - Array of { product: id|string, variant: { id }, quantity: number }
+ * @param {string} params.discountCode - Optional coupon code
  * @param {Object} params.shippingAddress - Shipping address object
+ * @param {Object} params.paymentDetails - Payment method info
  * @returns {Promise<Object>} Created order document
  */
-export const processOrderCreation = async ({ userId, items, shippingAddress }) => {
+export const processOrderCreation = async ({
+  userId = null,
+  customer = {},
+  items = [],
+  discountCode = '',
+  shippingAddress = {},
+  paymentDetails = {}
+}) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw createHttpError(400, 'Order must contain at least one item');
+  }
+
   const verifiedOrderItems = [];
-  let calculatedTotal = 0;
+  let calculatedSubtotal = 0;
   const productsToUpdate = [];
 
   for (const item of items) {
-    const product = await Product.findById(item.product);
+    // Locate product by custom id, ObjectId, or slug
+    const productId = typeof item.product === 'object' ? item.product?.id || item.product?._id : item.product;
+    
+    let product = await Product.findOne({
+      $or: [
+        { id: productId },
+        ...(productId && productId.toString().match(/^[0-9a-fA-F]{24}$/) ? [{ _id: productId }] : []),
+        { slug: productId }
+      ]
+    });
+
     if (!product) {
-      throw createHttpError(404, `Product not found with id: ${item.product}`);
+      throw createHttpError(404, `Product not found with identifier: ${productId}`);
     }
 
-    // Locate requested variant
+    // Locate requested variant (by id or label)
+    const targetVariantId = item.variant?.id || item.variantId || item.variantSize;
     const variant = product.variants.find(
-      (v) => v.size.toLowerCase() === item.variantSize.trim().toLowerCase()
-    );
+      (v) =>
+        (v.id && targetVariantId && v.id.toLowerCase() === targetVariantId.toString().toLowerCase()) ||
+        (v.label && targetVariantId && v.label.toLowerCase() === targetVariantId.toString().toLowerCase())
+    ) || product.variants[0];
 
     if (!variant) {
+      throw createHttpError(400, `Variant not found for product "${product.name}"`);
+    }
+
+    const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+
+    // Check inventory stock if tracked
+    if (variant.stock !== undefined && variant.stock < qty) {
       throw createHttpError(
         400,
-        `Variant size '${item.variantSize}' does not exist for product '${product.title}'`
+        `Insufficient inventory for "${product.name}" (${variant.label}). Available: ${variant.stock}, Requested: ${qty}`
       );
     }
 
-    // Check inventory stock
-    if (variant.stock < item.quantity) {
-      throw createHttpError(
-        400,
-        `Insufficient stock for '${product.title}' (${variant.size}). Requested: ${item.quantity}, Available: ${variant.stock}`
-      );
+    const itemPrice = Number(variant.price);
+    const itemSubtotal = Math.round(itemPrice * qty * 100) / 100;
+    calculatedSubtotal += itemSubtotal;
+
+    // Decrement stock
+    if (variant.stock !== undefined) {
+      variant.stock = Math.max(0, variant.stock - qty);
+      if (variant.stock === 0) {
+        variant.inStock = false;
+      }
+      productsToUpdate.push(product);
     }
-
-    // Authoritative server-side pricing calculation
-    const itemSubtotal = variant.price * item.quantity;
-    calculatedTotal += itemSubtotal;
-
-    // Track variant stock decrement
-    variant.stock -= item.quantity;
-    productsToUpdate.push(product);
 
     verifiedOrderItems.push({
-      product: product._id,
-      variantSize: variant.size,
-      price: variant.price,
-      quantity: item.quantity
+      product: product.id || product._id,
+      productName: product.name,
+      productImage: product.image,
+      variantId: variant.id,
+      variantLabel: variant.label,
+      price: itemPrice,
+      quantity: qty,
+      subtotal: itemSubtotal
     });
   }
 
-  // Persist stock decrements
-  for (const product of productsToUpdate) {
-    await product.save();
+  // Persist inventory decrements
+  for (const prod of productsToUpdate) {
+    await prod.save();
   }
 
-  // Create the new Order record
-  const order = await Order.create({
-    user: userId,
-    items: verifiedOrderItems,
-    totalAmount: Math.round(calculatedTotal * 100) / 100, // round to 2 decimals
-    shippingAddress: shippingAddress || {},
-    status: 'pending',
-    paymentStatus: 'unpaid'
-  });
+  // Round subtotal to 2 decimals
+  calculatedSubtotal = Math.round(calculatedSubtotal * 100) / 100;
 
-  // Populate product details for the immediate response
-  await order.populate('items.product', 'title slug imageUrl category');
+  // Validate discount code if provided
+  let discountPercent = 0;
+  let discountAmount = 0;
+  let appliedDiscountCode = '';
+
+  if (discountCode && discountCode.trim()) {
+    const couponResult = couponService.validateCoupon(discountCode, calculatedSubtotal);
+    if (couponResult.valid) {
+      discountPercent = couponResult.discountPercent;
+      discountAmount = couponResult.discountAmount;
+      appliedDiscountCode = couponResult.code;
+    }
+  }
+
+  // Authoritative shipping calculation: Free over $60 or standard $7
+  const afterDiscount = Math.max(0, calculatedSubtotal - discountAmount);
+  const shippingAmount = afterDiscount >= 60 || afterDiscount === 0 ? 0 : 7.0;
+
+  const grandTotal = Math.round((afterDiscount + shippingAmount) * 100) / 100;
+
+  // Generate unique Order Confirmation Number: ZL-XXXXXX
+  const orderId = `ZL-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  // Create the Order record
+  const order = await Order.create({
+    orderId,
+    user: userId || null,
+    customer: {
+      name: customer.name || shippingAddress.fullName || 'Guest Customer',
+      email: customer.email || '',
+      phone: customer.phone || ''
+    },
+    items: verifiedOrderItems,
+    subtotal: calculatedSubtotal,
+    discountCode: appliedDiscountCode,
+    discountPercent,
+    discountAmount,
+    shippingAmount,
+    grandTotal,
+    shippingAddress: {
+      fullName: shippingAddress.fullName || customer.name || '',
+      street: shippingAddress.street || shippingAddress.address || '',
+      city: shippingAddress.city || '',
+      state: shippingAddress.state || '',
+      postalCode: shippingAddress.postalCode || shippingAddress.zip || '',
+      country: shippingAddress.country || 'USA'
+    },
+    paymentDetails: {
+      method: paymentDetails.method || 'card',
+      last4: paymentDetails.cardNumber ? paymentDetails.cardNumber.slice(-4) : '4242',
+      status: 'paid'
+    },
+    status: 'processing'
+  });
 
   return order;
 };
 
 /**
- * Retrieve paginated order history for a specific customer
- *
- * @param {string} userId - Customer User ID
- * @returns {Promise<Array>} List of user orders
+ * Retrieve order history for a specific customer user
+ * @param {string} userId - User ObjectId
+ * @returns {Promise<Array>}
  */
 export const getUserOrders = async (userId) => {
-  return Order.find({ user: userId })
-    .populate('items.product', 'title slug imageUrl category brewingGuide')
-    .sort({ createdAt: -1 });
+  return Order.find({ user: userId }).sort({ createdAt: -1 }).lean();
+};
+
+/**
+ * Find single order by human-readable orderId (e.g. ZL-839201) or ObjectId
+ * @param {string} identifier
+ * @returns {Promise<Object>}
+ */
+export const findOrderById = async (identifier) => {
+  if (!identifier) return null;
+
+  let order = await Order.findOne({ orderId: identifier.toUpperCase().trim() }).lean();
+  if (order) return order;
+
+  if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
+    order = await Order.findById(identifier).lean();
+  }
+
+  return order;
 };
 
 export default {
   processOrderCreation,
-  getUserOrders
+  getUserOrders,
+  findOrderById
 };
