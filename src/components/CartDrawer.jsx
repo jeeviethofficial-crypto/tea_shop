@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Sparkles, Tag, Gift } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Minus from 'lucide-react/dist/esm/icons/minus';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Tag from 'lucide-react/dist/esm/icons/tag';
+import Gift from 'lucide-react/dist/esm/icons/gift';
 
 const FREE_SHIPPING_THRESHOLD = 60;
 const FREE_GIFT_THRESHOLD = 75;

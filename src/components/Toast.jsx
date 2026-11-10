@@ -1,5 +1,6 @@
 import React from 'react';
-import { CheckCircle2, X } from 'lucide-react';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import X from 'lucide-react/dist/esm/icons/x';
 
 export default function Toast({ toast, onClose, onOpenCart }) {
   if (!toast) return null;

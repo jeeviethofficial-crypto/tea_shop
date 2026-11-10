@@ -3,12 +3,12 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
-import OriginsSection from './components/OriginsSection';
-import Footer from './components/Footer';
-import Toast from './components/Toast';
 import { PRODUCTS, CATEGORIES } from './data/products';
 
-// Code-split interactive modals and drawers so unused JavaScript is not loaded on initial page render
+// Code-split below-the-fold components and interactive overlays to prevent blocking initial LCP
+const OriginsSection = lazy(() => import('./components/OriginsSection'));
+const Footer = lazy(() => import('./components/Footer'));
+const Toast = lazy(() => import('./components/Toast'));
 const CartDrawer = lazy(() => import('./components/CartDrawer'));
 const TeaQuizModal = lazy(() => import('./components/TeaQuizModal'));
 const ProductQuickViewModal = lazy(() => import('./components/ProductQuickViewModal'));
@@ -245,11 +245,15 @@ export default function App() {
         </section>
 
         {/* 5. Origins & Stewardship Section */}
-        <OriginsSection />
+        <Suspense fallback={<div className="min-h-[200px]" />}>
+          <OriginsSection />
+        </Suspense>
       </main>
 
       {/* 6. Footer Section */}
-      <Footer onOpenQuiz={() => setIsQuizOpen(true)} />
+      <Suspense fallback={<div className="min-h-[200px]" />}>
+        <Footer onOpenQuiz={() => setIsQuizOpen(true)} />
+      </Suspense>
 
       {/* Slide-over Shopping Cart Drawer */}
       {isCartOpen && (
@@ -323,11 +327,13 @@ export default function App() {
       )}
 
       {/* Toast Notification */}
-      <Toast
-        toast={toast}
-        onClose={() => setToast(null)}
-        onOpenCart={() => setIsCartOpen(true)}
-      />
+      <Suspense fallback={null}>
+        <Toast
+          toast={toast}
+          onClose={() => setToast(null)}
+          onOpenCart={() => setIsCartOpen(true)}
+        />
+      </Suspense>
     </div>
   );
 }

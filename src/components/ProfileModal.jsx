@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, CheckCircle2 } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 
 export default function ProfileModal({ isOpen, onClose }) {
   if (!isOpen) return null;

@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Search, User, Menu, X, Sparkles } from 'lucide-react';
+import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
+import Search from 'lucide-react/dist/esm/icons/search';
+import User from 'lucide-react/dist/esm/icons/user';
+import Menu from 'lucide-react/dist/esm/icons/menu';
+import X from 'lucide-react/dist/esm/icons/x';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 
 export default function Navbar({
   cartCount,

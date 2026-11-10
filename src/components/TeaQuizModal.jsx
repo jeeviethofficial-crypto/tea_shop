@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Check, ArrowRight, RotateCcw, Star } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Check from 'lucide-react/dist/esm/icons/check';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import RotateCcw from 'lucide-react/dist/esm/icons/rotate-ccw';
+import Star from 'lucide-react/dist/esm/icons/star';
 import { QUIZ_QUESTIONS, PRODUCTS } from '../data/products';
 
 export default function TeaQuizModal({ isOpen, onClose, onAddToCart, onQuickView }) {

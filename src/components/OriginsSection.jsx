@@ -1,5 +1,8 @@
 import React from 'react';
-import { Recycle, ShieldCheck, HeartHandshake, Compass } from 'lucide-react';
+import Recycle from 'lucide-react/dist/esm/icons/recycle';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import HeartHandshake from 'lucide-react/dist/esm/icons/heart-handshake';
+import Compass from 'lucide-react/dist/esm/icons/compass';
 
 export default function OriginsSection() {
   const origins = [

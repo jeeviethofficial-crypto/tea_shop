@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowDown, Sparkles, Star, Check, Plus, ShieldCheck } from 'lucide-react';
+import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Star from 'lucide-react/dist/esm/icons/star';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 
 export default function Hero({ onShopClick, onQuizClick, onAddToCart }) {
   const [selectedVariant, setSelectedVariant] = useState('50g');

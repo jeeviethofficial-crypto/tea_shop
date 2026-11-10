@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { X, Star, MapPin, Sparkles, Plus, Check } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import Star from 'lucide-react/dist/esm/icons/star';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Check from 'lucide-react/dist/esm/icons/check';
 
 export default function ProductQuickViewModal({ product, isOpen, onClose, onAddToCart }) {
   const [selectedVariantId, setSelectedVariantId] = useState(product?.variants?.[0]?.id);

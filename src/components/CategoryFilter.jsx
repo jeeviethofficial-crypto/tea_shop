@@ -1,5 +1,6 @@
 import React from 'react';
-import { SlidersHorizontal, X } from 'lucide-react';
+import SlidersHorizontal from 'lucide-react/dist/esm/icons/sliders-horizontal';
+import X from 'lucide-react/dist/esm/icons/x';
 import { CATEGORIES } from '../data/products';
 
 export default function CategoryFilter({

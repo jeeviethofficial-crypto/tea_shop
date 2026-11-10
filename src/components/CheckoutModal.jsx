@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, ShieldCheck } from 'lucide-react';
+import X from 'lucide-react/dist/esm/icons/x';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 
 export default function CheckoutModal({
   isOpen,

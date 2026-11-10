@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Mail, Check, Leaf, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Leaf from 'lucide-react/dist/esm/icons/leaf';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 
 export default function Footer({ onOpenQuiz }) {
   const [email, setEmail] = useState('');

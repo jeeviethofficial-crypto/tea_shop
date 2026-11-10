@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { MapPin, Star, Plus, Check, Eye } from 'lucide-react';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Star from 'lucide-react/dist/esm/icons/star';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Eye from 'lucide-react/dist/esm/icons/eye';
 
 export default function ProductCard({
   product,
